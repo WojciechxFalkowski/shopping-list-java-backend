@@ -5,8 +5,8 @@ FROM ${IMAGE_NAME}
 # Ustaw katalog roboczy
 WORKDIR /app
 
-CMD ["chmod", "+x", "gradlew"]
-CMD ["./gradlew", "clean", "build", "-x", "test"]
+RUN ["chmod", "+x", "gradlew"]
+RUN ["./gradlew", "clean", "build", "-x", "test"]
 
 # Skopiuj pliki JAR do obrazu
 COPY build/libs/*.jar app.jar
