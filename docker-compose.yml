@@ -6,11 +6,11 @@ services:
       context: . # Ścieżka do katalogu z Dockerfile
       dockerfile: Dockerfile
       args:
-        IMAGE_NAME: eclipse-temurin:17-jdk-focal # Przykład obrazu JDK 17
+        IMAGE_NAME: eclipse-temurin:17-jdk-focal # raspberry pi -> eclipse-temurin:17-jdk-focal, PC -> openjdk:17-jdk-slim
     ports:
       - "${SERVER_PORT}:8080" # Mapowanie portu aplikacji na hosta
     volumes:
       - ./logs:/app/logs # Opcjonalnie, montowanie logów (dostosuj według potrzeb)
     environment:
       - JAVA_OPTS=-Xmx512m -Xms256m # Opcjonalne parametry JVM
-    restart: unless-stopped
+    restart: always
