@@ -6,7 +6,7 @@ services:
       context: . # Ścieżka do katalogu z Dockerfile
       dockerfile: Dockerfile
       args:
-        IMAGE_NAME: eclipse-temurin:17-jdk-alpine # Przykład obrazu JDK 17
+        IMAGE_NAME: eclipse-temurin:17-jdk-focal # Przykład obrazu JDK 17
     ports:
       - "${SERVER_PORT}:8080" # Mapowanie portu aplikacji na hosta
     volumes:
