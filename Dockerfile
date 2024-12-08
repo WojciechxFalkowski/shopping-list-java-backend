@@ -1,12 +1,13 @@
+# BEFORE docker compose up -d --build
+#RUN "chmod +x gradlew"
+#RUN "./gradlew clean build -x test"
+
 # Użycie ARG do ustawienia obrazu bazowego
 ARG IMAGE_NAME
 FROM ${IMAGE_NAME}
 
 # Ustaw katalog roboczy
 WORKDIR /app
-
-RUN "chmod +x gradlew"
-RUN "./gradlew clean build -x test"
 
 # Skopiuj pliki JAR do obrazu
 COPY build/libs/*.jar app.jar
