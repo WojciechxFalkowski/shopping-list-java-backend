@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  java-app:
+    build:
+      context: . # Ścieżka do katalogu z Dockerfile
+      dockerfile: Dockerfile
+      args:
+        IMAGE_NAME: eclipse-temurin:17-jdk-alpine # Przykład obrazu JDK 17
+    ports:
+      - "${SERVER_PORT}:8080" # Mapowanie portu aplikacji na hosta
+    volumes:
+      - ./logs:/app/logs # Opcjonalnie, montowanie logów (dostosuj według potrzeb)
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m # Opcjonalne parametry JVM
+    restart: unless-stopped

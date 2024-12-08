@@ -1,0 +1,1 @@
+ALTER TABLE list_item RENAME TO shopping_list_item;
