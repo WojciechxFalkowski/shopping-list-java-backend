@@ -5,11 +5,12 @@ FROM ${IMAGE_NAME}
 # Ustaw katalog roboczy
 WORKDIR /app
 
+CMD ["chmod", "+x", "gradlew"]
+CMD ["./gradlew", "clean", "build", "-x", "test"]
+
 # Skopiuj pliki JAR do obrazu
 COPY build/libs/*.jar app.jar
 
-CMD ["chmod", "+x", "gradlew"]
-CMD ["./gradlew", "clean", "build", "-x", "test"]
 # Ustaw port
 EXPOSE ${SERVER_PORT}
 
