@@ -26,4 +26,9 @@ public class UserController {
     public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
     }
+
+    @GetMapping("me")
+    public ResponseEntity<UserDto> getUser(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(userService.getUserByToken(token));
+    }
 }

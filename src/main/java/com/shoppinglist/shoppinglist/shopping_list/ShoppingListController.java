@@ -10,7 +10,6 @@ import com.shoppinglist.shoppinglist.shopping_list_item.dto.CreateShoppingListIt
 import com.shoppinglist.shoppinglist.shopping_list_item.dto.CreateShoppingListItemsDto;
 import com.shoppinglist.shoppinglist.shopping_list_item.dto.ShoppingListItemDto;
 import com.shoppinglist.shoppinglist.shopping_list_item.dto.UpdateShoppingListItemDto;
-import com.shoppinglist.shoppinglist.user.UserEntity;
 import com.shoppinglist.shoppinglist.user.UserService;
 import com.shoppinglist.shoppinglist.user.dto.UserDto;
 import jakarta.validation.Valid;
@@ -53,19 +52,19 @@ public class ShoppingListController {
         return ResponseEntity.ok(shoppingListService.deleteSharedWithUsersByShoppingList(token, deleteSharedUserDTO.getShoppingListId(), deleteSharedUserDTO.getToBeDeletedUserId()));
     }
 
-    @GetMapping("me")
+    @GetMapping("my-shopping-lists")
     public ResponseEntity<List<ShoppingListWithShoppingItemsDto>> getAllUserShoppingLists(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(shoppingListService.getAllUserShoppingLists(token));
     }
 
     @PostMapping
-    public ResponseEntity<ShoppingListEntity> createShoppingList(@RequestBody @Valid CreateShoppingListDTO shoppingListDTO, @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String username = jwtUtil.extractUsername(token);
+    public ResponseEntity<ShoppingListWithShoppingItemsDto> createShoppingList(@RequestBody @Valid CreateShoppingListDTO shoppingListDTO, @RequestHeader("Authorization") String token) {
+//        String token = token.replace("Bearer ", "");
+//        String username = jwtUtil.extractUsername(token);
         ShoppingListEntity shoppingList = new ShoppingListEntity();
         shoppingList.setName(shoppingListDTO.getName());
 
-        return ResponseEntity.ok(shoppingListService.createShoppingList(shoppingList, username));
+        return ResponseEntity.ok(shoppingListService.createShoppingList(shoppingList, token));
     }
 
     @DeleteMapping
@@ -83,15 +82,6 @@ public class ShoppingListController {
         return ResponseEntity.ok(shoppingListService.addUserToShareShoppingList(listId, sharedUserId, username));
     }
 
-    @GetMapping("/shared")
-    public ResponseEntity<List<ShoppingListEntity>> getSharedShoppingLists(@RequestHeader("Authorization") String authHeader) {
-        String username = jwtUtil.getUsernameFromToken(authHeader);
-        UserEntity user = userService.findByUsername(username);
-
-        List<ShoppingListEntity> sharedLists = shoppingListService.getSharedShoppingListsForUser(user.getId());
-        return ResponseEntity.ok(sharedLists);
-    }
-
     @PostMapping("/add-shopping-item")
     public ResponseEntity<ShoppingListItemDto> addShoppingItemToShoppingList(@RequestHeader("Authorization") String token, @RequestBody CreateShoppingListItemDto dto) {
         return ResponseEntity.ok(shoppingListService.addShoppingItemToShoppingList(token, dto.getListId(), dto));
@@ -102,10 +92,10 @@ public class ShoppingListController {
         return ResponseEntity.ok(shoppingListService.addShoppingItemsToShoppingList(token, shoppingListItemsDto.getListId(), shoppingListItemsDto));
     }
 
-    @PutMapping("/update-shopping-item/{itemId}")
-    public ResponseEntity<ShoppingListItemDto> updateItem(@PathVariable UUID itemId, @RequestHeader("Authorization") String token, @RequestBody UpdateShoppingListItemDto dto) {
+    @PutMapping("/update-shopping-item")
+    public ResponseEntity<ShoppingListWithShoppingItemsDto> updateItem(@RequestHeader("Authorization") String token, @RequestBody UpdateShoppingListItemDto dto) {
 
-        return ResponseEntity.ok(shoppingListService.updateShoppingItemInShoppingList(token, itemId, dto));
+        return ResponseEntity.ok(shoppingListService.updateShoppingItemInShoppingList(token, dto));
     }
 
     @DeleteMapping("/delete-shopping-item/{itemId}")

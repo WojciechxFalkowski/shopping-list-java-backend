@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -151,6 +152,8 @@ public class ReceiptService {
         List<ReceiptEntity> receipts = receiptRepository.findAll();
         return receipts.stream()
                 .map(this::mapToDto)
+                .sorted(Comparator.comparing(ReceiptDto::getDate, Comparator.reverseOrder())
+                        .thenComparing(ReceiptDto::getTime, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
     }
 

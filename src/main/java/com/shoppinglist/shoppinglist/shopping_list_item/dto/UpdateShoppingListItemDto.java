@@ -7,11 +7,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateShoppingListItemDto {
+    private UUID shoppingListId;
+
+    private UUID shoppingListItemId;
 
     @Size(min = 1, max = 100)
     private String name;

@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,7 +58,7 @@ public class ShoppingListService {
 
         // Pobierz elementy listy zakupów
         List<ShoppingListItemDto> shoppingItems = shoppingListItemService.getShoppingItemsByListId(token, listId);
-
+//        shoppingItems.get(0).get
         List<UserDto> sharedWithUsers = new ArrayList<>();
         List<SharedListEntity> sharedShoppingLists = sharedListService.getSharedListByShoppingListId(shoppingList.getId());
 
@@ -68,7 +69,9 @@ public class ShoppingListService {
 //        sharedList.getSharedListByShoppingListId
 
         // Sortowanie elementów listy zakupów według createdAt (malejąco)
-        shoppingItems.sort((item1, item2) -> item1.getCreatedAt().compareTo(item2.getCreatedAt()));
+        shoppingItems.sort(Comparator.comparing(ShoppingListItemDto::getCreatedAt)
+                .thenComparing(ShoppingListItemDto::getId));
+
 
         // Utwórz i zwróć DTO
         return ShoppingListWithShoppingItemsDto.builder()
@@ -90,8 +93,6 @@ public class ShoppingListService {
 
         // Pobierz listy zakupów, których użytkownik jest właścicielem
         List<ShoppingListEntity> ownedLists = shoppingListRepository.findAllByOwnerId(user.getId());
-//        System.out.println("ownedLists");
-//        System.out.println(ownedLists);
         // Pobierz listy zakupów, które są udostępnione użytkownikowi
         List<ShoppingListEntity> sharedLists = sharedListRepository.findAllByUserId(user.getId()).stream()
                 .map(sharedList -> shoppingListRepository.findById(sharedList.getShoppingListId())
@@ -137,11 +138,13 @@ public class ShoppingListService {
     }
 
 
-    public ShoppingListEntity createShoppingList(ShoppingListEntity shoppingListEntity, String username) {
+    public ShoppingListWithShoppingItemsDto createShoppingList(ShoppingListEntity shoppingListEntity, String token) {
+        String username = jwtUtil.getUsernameFromToken(token);
         UserEntity user = userService.findByUsername(username);
         shoppingListEntity.setListCode(generateListCode());
         shoppingListEntity.setOwnerId(user.getId());
-        return shoppingListRepository.save(shoppingListEntity);
+        ShoppingListEntity addedShoppingList = shoppingListRepository.save(shoppingListEntity);
+        return getShoppingList(token, addedShoppingList.getId());
     }
 
     public List<ShoppingListWithShoppingItemsDto> deleteShoppingList(UUID shoppingListId, String token) {
@@ -161,10 +164,7 @@ public class ShoppingListService {
             return getAllUserShoppingLists(token);
         }
 
-        System.out.println("v4");
-
         sharedListService.deleteSharedList(shoppingListId, user.getId());
-        System.out.println("v5");
         return getAllUserShoppingLists(token);
     }
 
@@ -247,11 +247,11 @@ public class ShoppingListService {
         return shoppingListItemService.addShoppingItem(shoppingListItem);
     }
 
-    public ShoppingListItemDto updateShoppingItemInShoppingList(String token, UUID itemId, UpdateShoppingListItemDto dto) {
+    public ShoppingListWithShoppingItemsDto updateShoppingItemInShoppingList(String token, UpdateShoppingListItemDto dto) {
         String username = jwtUtil.getUsernameFromToken(token);
         UserEntity user = userService.findByUsername(username);
 
-        ShoppingListItemEntity shoppingListItem = shoppingListItemService.findById(itemId);
+        ShoppingListItemEntity shoppingListItem = shoppingListItemService.findById(dto.getShoppingListItemId());
 
         if (!isOwnerOrShared(shoppingListItem.getList().getId(), user)) {
             throw new AccessDeniedException("You do not have permission to update this item");
@@ -261,7 +261,8 @@ public class ShoppingListService {
         shoppingListItem.setQuantity(dto.getQuantity());
         shoppingListItem.setPurchased(dto.getPurchased());
 
-        return shoppingListItemService.addShoppingItem(shoppingListItem);
+        shoppingListItemService.addShoppingItem(shoppingListItem);
+        return getShoppingList(token, dto.getShoppingListId());
     }
 
     public ShoppingListWithShoppingItemsDto deleteShoppingItemInShoppingList(String token, UUID itemId) {

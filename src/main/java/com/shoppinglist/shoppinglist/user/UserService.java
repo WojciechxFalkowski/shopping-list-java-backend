@@ -1,5 +1,6 @@
 package com.shoppinglist.shoppinglist.user;
 
+import com.shoppinglist.shoppinglist.security.JwtUtil;
 import com.shoppinglist.shoppinglist.user.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +18,9 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public UserDto createUser(UserEntity user) {
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -86,5 +90,12 @@ public class UserService {
     private String hashPassword(String password) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(password);
+    }
+
+    public UserDto getUserByToken(String token) {
+        String username = jwtUtil.getUsernameFromToken(token);
+        UserEntity user = findByUsername(username);
+
+        return mapUserToDto(user);
     }
 }
